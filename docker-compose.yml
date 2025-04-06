@@ -1,0 +1,6 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "3000:80"   # frontend доступен по http://your-server-ip:3000
+    container_name: frontend
