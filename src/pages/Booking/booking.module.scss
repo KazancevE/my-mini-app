@@ -1,0 +1,40 @@
+// .button {
+//     width: 300px;
+//     border: 1px solid black;
+//     border-radius: 5px;
+//     margin-bottom: 5px;
+//     min-height: 5vh
+//     };
+
+// .button::placeholder {
+//     color: #c71a1a; /* Цвет текста плейсхолдера */
+//     font-style: italic; /* Стиль текста плейсхолдера */
+// }
+
+.container {
+    margin-top: 5vh;
+}
+
+.wrapperStyle {
+    width: 80vw;
+    padding: 10px 4px;
+    // border-radius: 20px;
+}
+
+.timepicker {
+    width: 100%;
+}
+.button {
+    width: 80vw;
+    height: 8vh;
+    background-color: #333232;
+    border-radius: 20px;
+    font-family: SF Pro;
+    font-weight: 590;
+    font-size: 17px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: center;
+    color: #FFFFFF;
+    margin: 1vh 0;
+  }

@@ -1,0 +1,29 @@
+@import'normalize.css';@font-face{font-family:"calibri_light";src:href("../public/fonts/calibri_light.ttf")}@font-face{font-family:"tele2_displayserif-bold";src:href("../public/fonts/tele2_displayserif-bold.ttf")}@font-face{font-family:"calibri_regular";src:href("../public/fonts/calibri.ttf")}*{padding:0;margin:0}h1,h2,h3,h4,h5,h6,a,span,p,button,li,input{font-family:"calibri_regular";color:#000;margin:0;padding:0}span,p,a{font-family:"calibri_light"}h1{font-size:clamp(
+    1.75rem,
+    1.4627659574rem + 1.2765957447vw,
+    2.5rem
+  )}h2{font-size:clamp(
+    1.625rem,
+    1.3856382979rem + 1.0638297872vw,
+    2.25rem
+  )}h3{font-size:clamp(
+    1.5rem,
+    1.3085106383rem + 0.8510638298vw,
+    2rem
+  )}h4{font-size:clamp(
+    1.375rem,
+    1.2313829787rem + 0.6382978723vw,
+    1.75rem
+  )}h5{font-size:clamp(
+    1.25rem,
+    1.1542553191rem + 0.4255319149vw,
+    1.5rem
+  )}h6{font-size:clamp(
+    1.125rem,
+    1.0771276596rem + 0.2127659574vw,
+    1.25rem
+  )}ul{list-style:none}a:active,a:hover,a{text-decoration:none}body{font-size:clamp(
+    1.125rem,
+    1.0771276596rem + 0.2127659574vw,
+    1.25rem
+  )}

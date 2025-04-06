@@ -1,0 +1,84 @@
+@import './_normalize';
+
+// App.scss
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Для всех календарей */
+.ant-picker-calendar .ant-picker-cell .ant-picker-cell-inner {
+  color: #294059 !important;
+}
+
+/* При наведении */
+.ant-picker-calendar .ant-picker-cell:hover .ant-picker-cell-inner {
+  color: #ffffff !important;
+}
+
+/* Выбранная дата */
+.ant-picker-calendar .ant-picker-cell-selected .ant-picker-cell-inner {
+  color: #ffffff !important;
+  border-radius: 50%;
+  background: #ff4d4f;
+}
+
+.ant-picker-calendar .ant-picker-panel th {
+  color: #294059; /* Ваш цвет текста */
+  font-weight: 500; /* Жирность текста */
+  padding: 8px 0; /* Отступы */
+}
+
+.ant-select-selector {
+  background-color: #F0F3F7 !important;
+  border-radius: 2vh !important;
+  text-align: center !important;
+}
+
+.ant-select-dropdown {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  .ant-select-item {
+    // padding: 8px 15px;
+    
+    &-option-selected {
+      background-color: #f0f7ff !important;
+    }
+    
+    &-option-active {
+      background-color: #F0F3F7 !important;
+    }
+  }
+}
+
+.ant-picker-cell-today .ant-picker-cell-inner::before {
+  border-radius: 50% !important;
+  border: 1px solid #1890ff !important; /* Стандартный голубой цвет Ant Design */
+}
+
+.app {
+  // min-height: 100vh;
+  overflow-y: hidden;
+  & > div {
+    min-height: 92vh;
+    padding-bottom: 1vh;
+  }
+}
+
+h4 {
+  font-family: Roboto;
+  font-weight: 600;
+  font-size: 25px;
+  line-height: 100%;
+  letter-spacing: 0px;
+  vertical-align: middle;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  // padding: 20px;
+  padding: 0 20px;
+  background-color: #eaeaea; // Светлый фон приложения
+}

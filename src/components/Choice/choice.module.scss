@@ -1,0 +1,60 @@
+h6 {
+    font-family: Roboto;
+    font-weight: 500;
+    font-size: 18.58px;
+    line-height: 31.84px;
+    letter-spacing: 0.13px;
+    color: #00000099;
+
+}
+
+.choice {
+    display: flex;
+    width: 80vw;
+    height: 5vh;
+    padding: 10px 4px;
+    background-color: #fff;
+    border-radius: 20px;
+    align-items: center;
+    justify-content: space-evenly;
+    margin: 1vh 0;
+}
+
+.counter_container{
+    display: flex;
+    span {
+        padding: 0 1vh;
+    }
+}
+
+.counter {
+    border-radius: 50%; // Делаем кнопки круглыми
+    width: 2vh; // Ширина кнопок
+    height: 50%; // Высота кнопок — 50% от родителя
+    aspect-ratio: 1 / 1;
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+    // border: 1px black solid;
+    // background-color: #fff;
+    // color: black;
+    // font-size: 20px;
+    cursor: pointer;
+}
+
+.button_icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.timepicker {
+    border: none;
+    // background-color: red;
+    .ant-select-selector {
+        background-color: red;
+    }
+   
+}

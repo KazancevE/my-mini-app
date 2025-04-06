@@ -1,0 +1,23 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 7vh;
+    background-color: #333232; // Основной цвет Telegram
+    color: white;
+    font-size: 18px;
+  
+    .user-info {
+      font-weight: bold;
+    }
+  
+    .burger-menu {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  }
+  
