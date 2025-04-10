@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.BASE_URL;
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const authService = {
     async login(initData: string) {
