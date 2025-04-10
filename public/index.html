@@ -8,22 +8,36 @@
 <body>
   <div id="root"></div>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script>
-        Telegram.WebApp.expand();
-        Telegram.WebApp.onEvent('safe_area_changed', function (safeArea) {
-            console.log('Safe area changed:', safeArea);
+  <script>
+    // Ждем инициализации Telegram WebApp
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.Telegram && window.Telegram.WebApp) {
+        const WebApp = window.Telegram.WebApp;
+        
+        // 1. Раскрываем на весь экран
+        WebApp.expand();
+        
+        // 2. Настраиваем поведение при закрытии
+        WebApp.enableClosingConfirmation();
+        
+        // 3. Отключаем свайп-закрытие (новый метод)
+        WebApp.disableSwipeNavigation();
+        
+        // 4. Обработчики событий
+        WebApp.onEvent('viewportChanged', function() {
+          if (!WebApp.isExpanded) {
+            WebApp.expand();
+          }
         });
-        function enterFullscreen() {
-            if (!Telegram.WebApp.isFullscreen) {
-                Telegram.WebApp.requestFullscreen();
-            }
+        
+        // 5. Проверка полноэкранного режима
+        if (!WebApp.isExpanded) {
+          WebApp.expand();
         }
-        Telegram.WebApp.onEvent('viewportChanged', function (event) {
-            enterFullscreen();
-        });
-        window.TelegramWebviewProxy.postEvent('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
-        window.TelegramWebviewProxy.postEvent('web_app_setup_closing_behavior', JSON.stringify({ need_confirmation: true }));
-
-    </script>
+      } else {
+        console.error('Telegram WebApp not detected! Running in browser mode.');
+      }
+    });
+  </script>
 </body>
 </html>

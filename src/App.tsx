@@ -14,13 +14,45 @@ import { useAuth } from './share/AuthProvider';
 const App: React.FC = () => {
   const { login, isAuthenticated  } = useAuth();
   useEffect(() => {
-    WebApp.enableClosingConfirmation(); // Включить подтверждение закрытия
-    WebApp.setHeaderColor('#333232');   // Другие настройки
-    WebApp.expand(); 
-    if (WebApp.initData) {
-      login(WebApp.initData).catch(console.error);
-    } 
-}, [login]);
+    // 1. Инициализация WebApp
+    WebApp.ready();
+    
+    // 2. Настройка поведения приложения
+    WebApp.enableClosingConfirmation();
+    WebApp.setHeaderColor('#333232');
+    WebApp.setBackgroundColor('#333232'); // Рекомендуется задать тот же цвет
+    
+    // 3. Обработка раскрытия на весь экран
+    const handleViewportChange = () => {
+      if (!WebApp.isExpanded) {
+        WebApp.expand();
+      }
+    };
+    
+    WebApp.onEvent('viewportChanged', handleViewportChange);
+    handleViewportChange(); // Вызываем сразу при инициализации
+    
+    // 4. Авторизация через initData
+    const initAuth = async () => {
+      try {
+        if (WebApp.initData) {
+          await login(WebApp.initData);
+          console.log('Auth successful, user:', WebApp.initDataUnsafe.user);
+        }
+      } catch (error) {
+        console.error('Auth error:', error);
+        WebApp.showAlert('Ошибка авторизации');
+      }
+    };
+    
+    initAuth();
+  
+    return () => {
+      WebApp.offEvent('viewportChanged', handleViewportChange);
+    };
+  }, [login]);
+
+  
   return (
     <Router>
       {isAuthenticated ? (
