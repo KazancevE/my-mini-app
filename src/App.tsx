@@ -16,7 +16,7 @@ const App: React.FC = () => {
   useEffect(() => {
     // 1. Инициализация WebApp
     WebApp.ready();
-    
+    console.log('WebApp', WebApp);
     // 2. Настройка поведения приложения
     WebApp.enableClosingConfirmation();
     WebApp.setHeaderColor('#333232');
@@ -52,7 +52,7 @@ const App: React.FC = () => {
     };
   }, [login]);
 
-  
+
   return (
     <Router>
       {isAuthenticated ? (
