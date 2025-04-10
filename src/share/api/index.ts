@@ -3,12 +3,24 @@ import axios from 'axios';
 const API_URL = process.env.BASE_URL;
 
 export const authService = {
-  async login(initData: string) {
-    const response = await axios.post(`${API_URL}/auth/validate_data`, { init_data: initData });
-    localStorage.setItem('access_token', response.data.access_token);
-    localStorage.setItem('refresh_token', response.data.refresh_token);
-    return response.data;
-  },
+    async login(initData: string) {
+        const response = await axios.post(
+          `${API_URL}/auth/validate_data/`, // Обратите внимание на слэш в конце
+          {
+            init_data: initData // Ключ должен быть "init_data", а не "initData"
+          },
+          {
+            headers: {
+              'accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        
+        localStorage.setItem('access_token', response.data.access_token);
+        localStorage.setItem('refresh_token', response.data.refresh_token);
+        return response.data;
+      },
 
   async refreshToken() {
     const refresh_token = localStorage.getItem('refresh_token');

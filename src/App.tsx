@@ -17,67 +17,60 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Обработчик изменений viewport
+  const initializeWebApp = useCallback(() => {
+    WebApp.ready();
+    WebApp.enableClosingConfirmation();
+    WebApp.setHeaderColor('#333232');
+    WebApp.setBackgroundColor('#333232');
+  }, []);
+
   const handleViewportChange = useCallback(() => {
     if (!WebApp.isExpanded) {
       WebApp.expand();
     }
   }, []);
 
-  useEffect(() => {
-    // 1. Инициализация WebApp
-    WebApp.ready();
-    console.log('WebApp environment:', {
-      platform: WebApp.platform,
-      version: WebApp.version,
-      initData: WebApp.initData ? 'exists' : 'empty',
-      user: WebApp.initDataUnsafe?.user
-    });
+  const handleAuthError = useCallback((error: unknown) => {
+    const errorMessage = error instanceof Error ? error.message : 'Ошибка авторизации';
+    console.error('Auth error:', error);
+    setAuthError(errorMessage);
+    WebApp.showAlert(errorMessage, () => WebApp.close());
+  }, []);
 
-    // 2. Настройка поведения приложения
-    WebApp.enableClosingConfirmation();
-    WebApp.setHeaderColor('#333232');
-    WebApp.setBackgroundColor('#333232');
-    
-    // 3. Добавляем обработчик viewport
-    WebApp.onEvent('viewportChanged', handleViewportChange);
-    handleViewportChange(); // Вызываем сразу для начального состояния
+  const authenticateUser = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setAuthError(null);
 
-    // 4. Авторизация через initData
-    const initAuth = async () => {
-      try {
-        setIsLoading(true);
-        setAuthError(null);
-
-        if (!WebApp.initData) {
-          throw new Error('Telegram auth data not provided');
-        }
-
-        if (!WebApp.initDataUnsafe?.user?.id) {
-          throw new Error('Invalid Telegram user data');
-        }
-
-        await login(WebApp.initData);
-        console.log('Auth successful, user:', WebApp.initDataUnsafe.user);
-        WebApp.HapticFeedback.notificationOccurred('success');
-      } catch (error) {
-        console.error('Auth error:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Unknown auth error';
-        setAuthError(errorMessage);
-        WebApp.showAlert(`Ошибка авторизации: ${errorMessage}`, () => {
-          WebApp.close();
-        });
-      } finally {
-        setIsLoading(false);
+      if (!WebApp.initData) {
+        throw new Error('Данные авторизации Telegram не предоставлены');
       }
-    };
 
-    initAuth();
+      if (!WebApp.initDataUnsafe?.user?.id) {
+        throw new Error('Неверные данные пользователя Telegram');
+      }
+
+      await login(WebApp.initData);
+      WebApp.HapticFeedback.notificationOccurred('success');
+    } catch (error) {
+      handleAuthError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [login, handleAuthError]);
+
+  useEffect(() => {
+    initializeWebApp();
+    
+    WebApp.onEvent('viewportChanged', handleViewportChange);
+    handleViewportChange();
+
+    authenticateUser();
 
     return () => {
       WebApp.offEvent('viewportChanged', handleViewportChange);
     };
-  }, [login, handleViewportChange]);
+  }, [initializeWebApp, handleViewportChange, authenticateUser]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -93,16 +86,20 @@ const App: React.FC = () => {
     );
   }
 
+  const renderProtectedRoute = (element: React.ReactNode) => (
+    isAuthenticated ? element : <Navigate to="/error" />
+  );
+
   return (
     <Router>
       <div className='app'>
         <Header />
         <Routes>
-          <Route path="/" element={isAuthenticated ? <Home /> : <Navigate to="/error" />} />
-          <Route path="/booking" element={isAuthenticated ? <Booking /> : <Navigate to="/error" />} />
-          <Route path="/tables" element={isAuthenticated ? <BookingTable /> : <Navigate to="/error" />} />
-          <Route path="/confirmation" element={isAuthenticated ? <ConfirmTable /> : <Navigate to="/error" />} />
-          <Route path="/finishbooking" element={isAuthenticated ? <FinishBooking /> : <Navigate to="/error" />} />
+          <Route path="/" element={renderProtectedRoute(<Home />)} />
+          <Route path="/booking" element={renderProtectedRoute(<Booking />)} />
+          <Route path="/tables" element={renderProtectedRoute(<BookingTable />)} />
+          <Route path="/confirmation" element={renderProtectedRoute(<ConfirmTable />)} />
+          <Route path="/finishbooking" element={renderProtectedRoute(<FinishBooking />)} />
           <Route path="/error" element={
             <div className="auth-error">
               <h1>Требуется авторизация</h1>
