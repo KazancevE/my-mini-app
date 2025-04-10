@@ -4,15 +4,13 @@ import axios, {
     AxiosRequestConfig,
     AxiosResponse,
     InternalAxiosRequestConfig,
-    AxiosHeaders,
-    RawAxiosRequestHeaders,
-    HeadersDefaults
+    AxiosHeaders
   } from 'axios';
   
   // 1. Конфигурация API
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = process.env.REACT_APP_API_URL || 'https://api.daxmedia.site';
   if (!API_URL) {
-    console.error('REACT_APP_API_URL is not defined');
+    console.error('API URL is not configured');
     throw new Error('API URL is not configured');
   }
   
@@ -21,17 +19,15 @@ import axios, {
     config: InternalAxiosRequestConfig<D> & { _retry?: boolean };
   }
   
-  // 3. Создание экземпляра axios с правильной типизацией заголовков
-  const defaultHeaders: RawAxiosRequestHeaders = {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    // 'X-Requested-With': 'XMLHttpRequest'
-  };
-  
+  // 3. Создание экземпляра axios
   const apiClient: AxiosInstance = axios.create({
     baseURL: API_URL,
     timeout: 15000,
-    headers: defaultHeaders
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    withCredentials: true
   });
   
   // 4. Проверка сетевых ошибок
@@ -48,7 +44,7 @@ import axios, {
     async login(initData: string): Promise<{ access_token: string; refresh_token: string }> {
       try {
         if (!initData?.includes('hash=')) {
-          throw new Error('Invalid initData format');
+          throw new Error('Invalid Telegram initData format');
         }
   
         const response = await apiClient.post<{
@@ -57,15 +53,15 @@ import axios, {
         }>('/auth/validate_data/', { init_data: initData });
   
         if (!response.data?.access_token || !response.data?.refresh_token) {
-          throw new Error('Invalid server response');
+          throw new Error('Invalid server response format');
         }
   
         localStorage.setItem('access_token', response.data.access_token);
         localStorage.setItem('refresh_token', response.data.refresh_token);
         return response.data;
-      } catch (error) {
+      } catch (error: unknown) {
         if (isNetworkError(error)) {
-          console.error('Network error:', error);
+          console.error('Network/CORS error:', error);
           throw new Error('Connection error. Please try again.');
         }
         console.error('Login error:', error);
@@ -86,12 +82,12 @@ import axios, {
         );
         
         if (!response.data?.access_token) {
-          throw new Error('Invalid refresh response');
+          throw new Error('Invalid refresh token response');
         }
   
         localStorage.setItem('access_token', response.data.access_token);
         return response.data;
-      } catch (error) {
+      } catch (error: unknown) {
         this.clearAuthData();
         console.error('Refresh error:', error);
         throw error;
@@ -105,19 +101,28 @@ import axios, {
     clearAuthData(): void {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
+    },
+  
+    isAuthenticated(): boolean {
+      return !!this.getAccessToken();
     }
   };
   
-  // 6. Интерцептор запросов с правильной типизацией заголовков
+  // 6. Интерцептор запросов
   apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       const token = authService.getAccessToken();
       if (token) {
-        if (!config.headers) {
-          config.headers = new AxiosHeaders();
-        }
+        config.headers = config.headers || new AxiosHeaders();
         config.headers.set('Authorization', `Bearer ${token}`);
       }
+      
+      // Для кросс-доменных запросов
+      if (new URL(config.baseURL || API_URL).origin !== window.location.origin) {
+        config.headers.set('Origin', window.location.origin);
+        config.headers.set('Sec-Fetch-Site', 'cross-site');
+      }
+      
       console.log(`Request: ${config.method?.toUpperCase()} ${config.url}`);
       return config;
     },
@@ -133,30 +138,35 @@ import axios, {
       console.log(`Response from ${response.config.url}: ${response.status}`);
       return response;
     },
-    async (error: ApiError) => {
-      const originalRequest = error.config;
+    async (error: unknown) => {
+      const axiosError = error as ApiError;
+      const originalRequest = axiosError.config;
       
       if (!originalRequest) {
         return Promise.reject(error);
       }
   
-      // Обработка 401 ошибки
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
-  
-        try {
-          const { access_token } = await authService.refreshToken();
-          if (!originalRequest.headers) {
-            originalRequest.headers = new AxiosHeaders();
-          }
-          originalRequest.headers.set('Authorization', `Bearer ${access_token}`);
-          return apiClient(originalRequest);
-        } catch (refreshError) {
-          authService.clearAuthData();
-          window.location.href = '/login';
-          return Promise.reject(refreshError);
-        }
+      // Обработка CORS ошибок
+      if (isNetworkError(axiosError)) {
+        console.error('CORS error detected');
+        return Promise.reject(new Error('CORS policy blocked the request'));
       }
+  
+      // Обработка 401 ошибки
+    //   if (axiosError.response?.status === 401 && !originalRequest._retry) {
+    //     originalRequest._retry = true;
+  
+    //     try {
+    //       const { access_token } = await authService.refreshToken();
+    //       originalRequest.headers = originalRequest.headers || new AxiosHeaders();
+    //       originalRequest.headers.set('Authorization', `Bearer ${access_token}`);
+    //       return apiClient(originalRequest);
+    //     } catch (refreshError: unknown) {
+    //       authService.clearAuthData();
+    //       window.location.href = '/login';
+    //       return Promise.reject(refreshError);
+    //     }
+    //   }
   
       return Promise.reject(error);
     }
