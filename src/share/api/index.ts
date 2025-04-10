@@ -25,7 +25,7 @@ import axios, {
   const defaultHeaders: RawAxiosRequestHeaders = {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
+    // 'X-Requested-With': 'XMLHttpRequest'
   };
   
   const apiClient: AxiosInstance = axios.create({
