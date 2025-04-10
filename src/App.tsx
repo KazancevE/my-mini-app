@@ -16,76 +16,123 @@ const App: React.FC = () => {
   const { login, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isTelegramEnv, setIsTelegramEnv] = useState(true);
 
+  // Инициализация WebApp
   const initializeWebApp = useCallback(() => {
-    WebApp.ready();
-    WebApp.enableClosingConfirmation();
-    WebApp.setHeaderColor('#333232');
-    WebApp.setBackgroundColor('#333232');
-  }, []);
-
-  const handleViewportChange = useCallback(() => {
-    if (!WebApp.isExpanded) {
-      WebApp.expand();
+    try {
+      WebApp.ready();
+      WebApp.enableClosingConfirmation();
+      WebApp.setHeaderColor('#333232');
+      WebApp.setBackgroundColor('#333232');
+      
+      // Проверяем, что мы в Telegram WebApp
+      if (!window.Telegram?.WebApp) {
+        setIsTelegramEnv(false);
+        throw new Error('Not in Telegram environment');
+      }
+    } catch (error) {
+      console.error('WebApp initialization error:', error);
+      setIsTelegramEnv(false);
     }
   }, []);
 
-  const handleAuthError = useCallback((error: unknown) => {
-    const errorMessage = error instanceof Error ? error.message : 'Ошибка авторизации';
-    console.error('Auth error:', error);
-    setAuthError(errorMessage);
-    WebApp.showAlert(errorMessage, () => WebApp.close());
-  }, []);
+  // Обработчик изменений viewport
+  const handleViewportChange = useCallback(() => {
+    if (isTelegramEnv && !WebApp.isExpanded) {
+      WebApp.expand();
+    }
+  }, [isTelegramEnv]);
 
+  // Аутентификация пользователя
   const authenticateUser = useCallback(async () => {
     try {
       setIsLoading(true);
       setAuthError(null);
 
-      if (!WebApp.initData) {
-        throw new Error('Данные авторизации Telegram не предоставлены');
+      if (!isTelegramEnv) return;
+
+      // Проверка данных авторизации
+      if (!WebApp.initData || !WebApp.initData.includes('hash=')) {
+        const errorMessage = WebApp.initData 
+          ? 'Invalid Telegram auth data format' 
+          : 'Telegram auth data not provided';
+        throw new Error(errorMessage);
       }
 
-      if (!WebApp.initDataUnsafe?.user?.id) {
-        throw new Error('Неверные данные пользователя Telegram');
-      }
+      console.log('Telegram initData:', {
+        length: WebApp.initData.length,
+        firstChars: WebApp.initData.substring(0, 30) + '...'
+      });
 
       await login(WebApp.initData);
-      WebApp.HapticFeedback.notificationOccurred('success');
+      console.log('Auth successful, user:', WebApp.initDataUnsafe?.user);
+      
+      if (isTelegramEnv) {
+        WebApp.HapticFeedback.notificationOccurred('success');
+      }
     } catch (error) {
-      handleAuthError(error);
+      console.error('Authentication error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      setAuthError(errorMessage);
+      
+      if (isTelegramEnv) {
+        WebApp.showAlert(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [login, handleAuthError]);
+  }, [isTelegramEnv, login]);
 
   useEffect(() => {
     initializeWebApp();
-    
-    WebApp.onEvent('viewportChanged', handleViewportChange);
-    handleViewportChange();
+
+    if (isTelegramEnv) {
+      WebApp.onEvent('viewportChanged', handleViewportChange);
+      handleViewportChange();
+    }
 
     authenticateUser();
 
     return () => {
-      WebApp.offEvent('viewportChanged', handleViewportChange);
+      if (isTelegramEnv) {
+        WebApp.offEvent('viewportChanged', handleViewportChange);
+      }
     };
-  }, [initializeWebApp, handleViewportChange, authenticateUser]);
+  }, [initializeWebApp, handleViewportChange, authenticateUser, isTelegramEnv]);
 
+  // Рендер состояния загрузки
   if (isLoading) {
     return <LoadingScreen />;
   }
 
+  // Рендер ошибки вне Telegram
+  if (!isTelegramEnv) {
+    return (
+      <div className="telegram-required">
+        <h1>Это Telegram Mini App</h1>
+        <p>Пожалуйста, откройте приложение через Telegram</p>
+        <button onClick={() => window.location.reload()}>
+          Обновить страницу
+        </button>
+      </div>
+    );
+  }
+
+  // Рендер ошибки авторизации
   if (authError) {
     return (
       <div className="error-container">
         <h1>Ошибка авторизации</h1>
         <p>{authError}</p>
-        <p>Пожалуйста, откройте приложение через Telegram</p>
+        <button onClick={() => window.location.reload()}>
+          Попробовать снова
+        </button>
       </div>
     );
   }
 
+  // Рендер защищенных маршрутов
   const renderProtectedRoute = (element: React.ReactNode) => (
     isAuthenticated ? element : <Navigate to="/error" />
   );
@@ -103,7 +150,7 @@ const App: React.FC = () => {
           <Route path="/error" element={
             <div className="auth-error">
               <h1>Требуется авторизация</h1>
-              <p>Пожалуйста, откройте приложение через Telegram</p>
+              <p>Пожалуйста, войдите через Telegram</p>
             </div>
           } />
         </Routes>
