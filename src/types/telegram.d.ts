@@ -2,6 +2,7 @@ declare global {
     interface Window {
       Telegram: {
         WebApp: {
+          HapticFeedback: any;
           showAlert: (message: string, callback?: () => void) => void;
           close: () => void;
           sendData: (data: string) => void;
