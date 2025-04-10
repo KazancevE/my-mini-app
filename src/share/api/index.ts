@@ -6,12 +6,12 @@ export const authService = {
   async login(initData: string) {
     const response = await axios.post(`${API_URL}/auth/validate_data`, { initData });
     localStorage.setItem('access_token', response.data.access_token);
-    localStorage.setItem('refreshToken', response.data.refresh_token);
+    localStorage.setItem('refresh_token', response.data.refresh_token);
     return response.data;
   },
 
   async refreshToken() {
-    const refresh_token = localStorage.getItem('refreshToken');
+    const refresh_token = localStorage.getItem('refresh_token');
     const response = await axios.post(`${API_URL}/auth/refresh`, { refresh_token });
     localStorage.setItem('access_token', response.data.access_token);
     return response.data;
@@ -51,7 +51,7 @@ axios.interceptors.response.use(
       } catch (refreshError) {
         // Очистка хранилища при неудачном обновлении токена
         localStorage.removeItem('access_token');
-        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('refresh_token');
         window.location.reload(); // или перенаправление на страницу входа
         return Promise.reject(refreshError);
       }
