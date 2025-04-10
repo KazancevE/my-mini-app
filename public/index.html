@@ -8,18 +8,22 @@
 <body>
   <div id="root"></div>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script>
-    Telegram.WebApp.expand();
-    // Telegram.WebApp.enableClosingConfirmation();
-    function enterFullscreen() {
-        if (!Telegram.WebApp.isFullscreen) {
-            Telegram.WebApp.requestFullscreen();
+    <script>
+        Telegram.WebApp.expand();
+        Telegram.WebApp.onEvent('safe_area_changed', function (safeArea) {
+            console.log('Safe area changed:', safeArea);
+        });
+        function enterFullscreen() {
+            if (!Telegram.WebApp.isFullscreen) {
+                Telegram.WebApp.requestFullscreen();
+            }
         }
-    }
+        Telegram.WebApp.onEvent('viewportChanged', function (event) {
+            enterFullscreen();
+        });
+        window.TelegramWebviewProxy.postEvent('web_app_setup_swipe_behavior', JSON.stringify({ allow_vertical_swipe: false }));
+        window.TelegramWebviewProxy.postEvent('web_app_setup_closing_behavior', JSON.stringify({ need_confirmation: true }));
 
-    Telegram.WebApp.onEvent('viewportChanged', function (event) {
-        enterFullscreen();
-    });
-  </script>
+    </script>
 </body>
 </html>
