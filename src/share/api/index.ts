@@ -4,16 +4,16 @@ const API_URL = process.env.BASE_URL
 
 export const authService = {
   async login(initData: string) {
-    const response = await axios.post(`${API_URL}/auth/telegram`, { initData });
-    localStorage.setItem('accessToken', response.data.accessToken);
-    localStorage.setItem('refreshToken', response.data.refreshToken);
+    const response = await axios.post(`${API_URL}/auth/validate_data`, { initData });
+    localStorage.setItem('accessToken', response.data.access_token);
+    localStorage.setItem('refreshToken', response.data.refresh_token);
     return response.data;
   },
 
   async refreshToken() {
-    const refreshToken = localStorage.getItem('refreshToken');
-    const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
-    localStorage.setItem('accessToken', response.data.accessToken);
+    const refresh_token = localStorage.getItem('refreshToken');
+    const response = await axios.post(`${API_URL}/auth/refresh`, { refresh_token });
+    localStorage.setItem('accessToken', response.data.access_token);
     return response.data;
   },
 
