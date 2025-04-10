@@ -4,7 +4,7 @@ const API_URL = process.env.BASE_URL;
 
 export const authService = {
   async login(initData: string) {
-    const response = await axios.post(`${API_URL}/auth/validate_data`, { initData });
+    const response = await axios.post(`${API_URL}/auth/validate_data`, { init_data: initData });
     localStorage.setItem('access_token', response.data.access_token);
     localStorage.setItem('refresh_token', response.data.refresh_token);
     return response.data;
