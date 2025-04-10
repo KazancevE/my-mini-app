@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["@twa-dev/sdk"],
+    "types": ["@twa-dev/sdk", "node"],
     "target": "es5",
     "lib": [
       "dom",
