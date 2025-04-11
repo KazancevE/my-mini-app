@@ -148,7 +148,7 @@ import axios, {
   
       // Обработка CORS ошибок
       if (isNetworkError(axiosError)) {
-        console.error('CORS error detected');
+        console.error('CORS error detected', axiosError);
         return Promise.reject(new Error('CORS policy blocked the request'));
       }
   
