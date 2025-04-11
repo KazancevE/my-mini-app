@@ -118,10 +118,10 @@ import axios, {
       }
       
       // Для кросс-доменных запросов
-      if (new URL(config.baseURL || API_URL).origin !== window.location.origin) {
-        config.headers.set('Origin', window.location.origin);
-        config.headers.set('Sec-Fetch-Site', 'cross-site');
-      }
+      // if (new URL(config.baseURL || API_URL).origin !== window.location.origin) {
+        // config.headers.set('Origin', window.location.origin);
+        // config.headers.set('Sec-Fetch-Site', 'cross-site');
+      // }
       
       console.log(`Request: ${config.method?.toUpperCase()} ${config.url}`);
       return config;
