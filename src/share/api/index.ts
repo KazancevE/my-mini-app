@@ -27,7 +27,7 @@ import axios, {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
-    withCredentials: true
+    // withCredentials: true
   });
   
   // 4. Проверка сетевых ошибок
